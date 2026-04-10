@@ -1,126 +1,17 @@
 const PESO = '₱';
-
-const productCatalog = [
-    { name: 'iDeal Aura', price: 2495, cost: 1497 },
-    { name: 'iDeal Atlas', price: 2495, cost: 1497 },
-    { name: 'iDeal Balance', price: 2495, cost: 1497 },
-    { name: 'iDeal Lune', price: 2395, cost: 1437 },
-    { name: 'iDeal Neutral', price: 2395, cost: 1437 },
-    { name: 'iDeal Core', price: 2395, cost: 1437 },
-    { name: 'iDeal Axis', price: 2595, cost: 1557 },
-    { name: 'iDeal Linear', price: 2295, cost: 1377 },
-    { name: 'iDeal Meridian', price: 2695, cost: 1617 },
-    { name: 'iDeal Vector', price: 2495, cost: 1497 },
-];
-
-const discountDefinitions = {
-    SUMMER2026: {
-        type: 'percentage',
-        value: 20,
-        active: true,
-        startDate: new Date('2026-01-01'),
-        endDate: new Date('2026-04-30'),
-        usageLimit: 100,
-    },
-    WELCOME10: {
-        type: 'fixed',
-        value: 100,
-        active: true,
-        startDate: new Date('2026-01-01'),
-        endDate: new Date('2026-04-30'),
-        usageLimit: 500,
-    },
-    FLASH50: {
-        type: 'percentage',
-        value: 50,
-        maxAmount: 200,
-        active: false,
-        startDate: new Date('2025-11-01'),
-        endDate: new Date('2025-11-30'),
-        usageLimit: 50,
-    },
-};
-
-function getDiscountAmount(grossRevenue, discountMeta) {
-    if (!discountMeta) return 0;
-
-    if (discountMeta.type === 'fixed') {
-        return Math.min(grossRevenue, discountMeta.value);
-    }
-
-    const byPercent = Math.round(grossRevenue * (discountMeta.value / 100));
-    if (typeof discountMeta.maxAmount === 'number') {
-        return Math.min(byPercent, discountMeta.maxAmount);
-    }
-    return byPercent;
-}
+const REPORT_API_URL = '../adminBack_end/reportAPI.php';
 
 const reportState = {
     activeFilter: 'thisMonth',
     rangeStart: null,
     rangeEnd: null,
     periodLabel: '',
-    filteredOrders: [],
     monthlyPerformance: [],
     summary: null,
     financial: null,
     topProducts: [],
     discountAnalytics: [],
 };
-
-const allOrders = buildOrderData();
-
-function buildOrderData() {
-    const today = startOfDay(new Date());
-    const aprilEnd = new Date(today.getFullYear(), 3, 30);
-    const sampleEndDate = today > aprilEnd ? aprilEnd : today;
-    const yearStart = new Date(sampleEndDate.getFullYear(), 0, 1);
-    const rows = [];
-
-    let cursor = new Date(yearStart);
-    let dayIndex = 0;
-
-    while (cursor <= sampleEndDate) {
-        const ordersToday = ((dayIndex * 7) % 5) + 3;
-
-        for (let i = 0; i < ordersToday; i += 1) {
-            const product = productCatalog[(dayIndex + i * 2) % productCatalog.length];
-            const units = ((dayIndex + i) % 4) + 1;
-            const grossRevenue = product.price * units;
-
-            let discountCode = null;
-            if ((dayIndex + i) % 7 === 0) {
-                discountCode = 'SUMMER2026';
-            } else if ((dayIndex + i) % 5 === 0) {
-                discountCode = 'WELCOME10';
-            } else if ((dayIndex + i) % 29 === 0 && cursor <= discountDefinitions.FLASH50.endDate) {
-                discountCode = 'FLASH50';
-            }
-
-            const discountMeta = discountCode ? discountDefinitions[discountCode] : null;
-            const discountAmount = getDiscountAmount(grossRevenue, discountMeta);
-            const netRevenue = grossRevenue - discountAmount;
-            const cost = product.cost * units;
-
-            rows.push({
-                date: new Date(cursor),
-                productName: product.name,
-                units,
-                customerId: `C${1000 + ((dayIndex * 13 + i * 17) % 420)}`,
-                discountCode,
-                discountAmount,
-                grossRevenue,
-                netRevenue,
-                profit: netRevenue - cost,
-            });
-        }
-
-        cursor.setDate(cursor.getDate() + 1);
-        dayIndex += 1;
-    }
-
-    return rows;
-}
 
 function startOfDay(date) {
     return new Date(date.getFullYear(), date.getMonth(), date.getDate());
@@ -221,93 +112,48 @@ function buildMonthlyPerformance(orders, start, end) {
     return series;
 }
 
-function computeReportData(start, end) {
+async function computeReportData(start, end) {
     const startBound = startOfDay(start);
     const endBound = endOfDay(end);
 
-    // Use the selected filter range as the single source for all report sections.
-    const filteredOrders = allOrders.filter(
-        (order) => order.date >= startBound && order.date <= endBound
-    );
-
-    // I compute all KPI totals in one pass to keep calculations consistent.
-    const totals = filteredOrders.reduce((acc, order) => {
-        acc.grossRevenue += order.grossRevenue;
-        acc.totalDiscount += order.discountAmount;
-        acc.netRevenue += order.netRevenue;
-        acc.totalUnits += order.units;
-        acc.totalProfit += order.profit;
-        acc.customers.add(order.customerId);
-        return acc;
-    }, {
-        grossRevenue: 0,
-        totalDiscount: 0,
-        netRevenue: 0,
-        totalUnits: 0,
-        totalProfit: 0,
-        customers: new Set(),
+    const params = new URLSearchParams({
+        start: formatDateInputValue(startBound),
+        end: formatDateInputValue(endBound),
+        _: String(Date.now()),
     });
 
-    const productMap = new Map();
-    filteredOrders.forEach((order) => {
-        if (!productMap.has(order.productName)) {
-            productMap.set(order.productName, { units: 0, revenue: 0 });
-        }
+    const response = await fetch(`${REPORT_API_URL}?${params.toString()}`, { cache: 'no-store' });
+    const payload = await response.json();
 
-        const item = productMap.get(order.productName);
-        item.units += order.units;
-        item.revenue += order.netRevenue;
-    });
-
-    const topProducts = productCatalog
-        .map((product) => {
-            const current = productMap.get(product.name) || { units: 0, revenue: 0 };
-            return {
-                name: product.name,
-                units: current.units,
-                revenue: current.revenue,
-            };
-        })
-        .sort((a, b) => b.revenue - a.revenue)
-        .slice(0, 5);
-
-    const discountAnalytics = Object.entries(discountDefinitions).map(([code, definition]) => {
-        const related = filteredOrders.filter((order) => order.discountCode === code);
-        const totalDiscount = related.reduce((sum, order) => sum + order.discountAmount, 0);
-        let status = 'Active';
-        if (!definition.active) {
-            status = 'Inactive';
-        } else if (definition.endDate < startOfDay(new Date())) {
-            status = 'Expired';
-        }
-
-        return {
-            code,
-            timesUsed: related.length,
-            totalDiscount,
-            status,
-        };
-    });
-
-    const totalOrders = filteredOrders.length;
+    if (!response.ok || payload.error) {
+        throw new Error(payload.error || 'Failed to load report data');
+    }
 
     return {
-        filteredOrders,
-        monthlyPerformance: buildMonthlyPerformance(filteredOrders, startBound, endBound),
+        monthlyPerformance: Array.isArray(payload.monthly_performance) ? payload.monthly_performance : [],
         summary: {
-            totalRevenue: totals.netRevenue,
-            totalOrders,
-            totalCustomers: totals.customers.size,
-            avgOrderValue: totalOrders ? totals.netRevenue / totalOrders : 0,
+            totalRevenue: Number(payload.summary?.total_revenue || 0),
+            totalOrders: Number(payload.summary?.total_orders || 0),
+            totalCustomers: Number(payload.summary?.total_customers || 0),
+            avgOrderValue: Number(payload.summary?.avg_order_value || 0),
         },
         financial: {
-            grossRevenue: totals.grossRevenue,
-            totalDiscount: totals.totalDiscount,
-            netRevenue: totals.netRevenue,
-            estProfit: totals.totalProfit,
+            grossRevenue: Number(payload.financial?.gross_revenue || 0),
+            totalDiscount: Number(payload.financial?.total_discounts || 0),
+            netRevenue: Number(payload.financial?.net_revenue || 0),
+            estProfit: Number(payload.financial?.estimated_profit || 0),
         },
-        topProducts,
-        discountAnalytics,
+        topProducts: (Array.isArray(payload.top_products) ? payload.top_products : []).map((item) => ({
+            name: item.name || 'Unknown Product',
+            units: Number(item.units_sold || 0),
+            revenue: Number(item.revenue || 0),
+        })),
+        discountAnalytics: (Array.isArray(payload.discount_analytics) ? payload.discount_analytics : []).map((item) => ({
+            code: item.code || '',
+            timesUsed: Number(item.times_used || 0),
+            totalDiscount: Number(item.total_discount || 0),
+            status: item.status || 'Inactive',
+        })),
     };
 }
 
@@ -409,7 +255,7 @@ function renderReport() {
     renderDiscountAnalytics(reportState.discountAnalytics);
 }
 
-function applyFilterRange(start, end, filterKey = null) {
+async function applyFilterRange(start, end, filterKey = null) {
     const safeStart = startOfDay(start);
     const safeEnd = startOfDay(end);
 
@@ -423,17 +269,20 @@ function applyFilterRange(start, end, filterKey = null) {
     reportState.rangeEnd = safeEnd;
     reportState.periodLabel = getRangeLabel(safeStart, safeEnd);
 
-    // I recompute report state once, then re-render the full UI from that state.
-    const computed = computeReportData(safeStart, safeEnd);
-    reportState.filteredOrders = computed.filteredOrders;
-    reportState.monthlyPerformance = computed.monthlyPerformance;
-    reportState.summary = computed.summary;
-    reportState.financial = computed.financial;
-    reportState.topProducts = computed.topProducts;
-    reportState.discountAnalytics = computed.discountAnalytics;
+    try {
+        const computed = await computeReportData(safeStart, safeEnd);
+        reportState.monthlyPerformance = computed.monthlyPerformance;
+        reportState.summary = computed.summary;
+        reportState.financial = computed.financial;
+        reportState.topProducts = computed.topProducts;
+        reportState.discountAnalytics = computed.discountAnalytics;
 
-    setActiveQuickFilter(filterKey);
-    renderReport();
+        setActiveQuickFilter(filterKey);
+        renderReport();
+    } catch (error) {
+        console.error('Failed to load report range:', error);
+        alert('Unable to load report data from the database right now.');
+    }
 }
 
 async function generatePDF() {

@@ -167,11 +167,11 @@ if (!isset($_SESSION['email']) ||!isset($_SESSION['role']) ||$_SESSION['role'] !
                                 <div class="stat-icon" style="background:#ecfdf5; color:#10b981;">
                                     <i class="fas fa-peso-sign"></i>
                                 </div>
-                                <span style="color:#10b981; font-size:12px; font-weight:600;">
-                                    <i class="fas fa-arrow-up"></i> 18.2%
+                                <span style="color:#6b7280; font-size:12px; font-weight:600;">
+                                    <i class="fas fa-minus"></i> Live
                                 </span>
                             </div>
-                            <div class="stat-value" id="totalRevenueValue">₱108,400</div>
+                            <div class="stat-value" id="totalRevenueValue">₱0</div>
                             <div class="stat-label">Total Revenue</div>
                         </div>
 
@@ -180,11 +180,11 @@ if (!isset($_SESSION['email']) ||!isset($_SESSION['role']) ||$_SESSION['role'] !
                                 <div class="stat-icon" style="background:#e0f2fe; color:#0ea5e9;">
                                     <i class="fas fa-shopping-bag"></i>
                                 </div>
-                                <span style="color:#10b981; font-size:12px; font-weight:600;">
-                                    <i class="fas fa-arrow-up"></i> 12.5%
+                                <span style="color:#6b7280; font-size:12px; font-weight:600;">
+                                    <i class="fas fa-minus"></i> Live
                                 </span>
                             </div>
-                            <div class="stat-value" id="totalOrdersValue">1,245</div>
+                            <div class="stat-value" id="totalOrdersValue">0</div>
                             <div class="stat-label">Total Orders</div>
                         </div>
 
@@ -193,11 +193,11 @@ if (!isset($_SESSION['email']) ||!isset($_SESSION['role']) ||$_SESSION['role'] !
                                 <div class="stat-icon" style="background:#f3e8ff; color:#9333ea;">
                                     <i class="fas fa-users"></i>
                                 </div>
-                                <span style="color:#10b981; font-size:12px; font-weight:600;">
-                                    <i class="fas fa-arrow-up"></i> 23.1%
+                                <span style="color:#6b7280; font-size:12px; font-weight:600;">
+                                    <i class="fas fa-minus"></i> Live
                                 </span>
                             </div>
-                            <div class="stat-value" id="totalCustomersValue">892</div>
+                            <div class="stat-value" id="totalCustomersValue">0</div>
                             <div class="stat-label">Total Customers</div>
                         </div>
 
@@ -206,11 +206,11 @@ if (!isset($_SESSION['email']) ||!isset($_SESSION['role']) ||$_SESSION['role'] !
                                 <div class="stat-icon" style="background:#fef9c3; color:#ca8a04;">
                                     <i class="fas fa-chart-bar"></i>
                                 </div>
-                                <span style="color:#10b981; font-size:12px; font-weight:600;">
-                                    <i class="fas fa-arrow-up"></i> 15.8%
+                                <span style="color:#6b7280; font-size:12px; font-weight:600;">
+                                    <i class="fas fa-minus"></i> Live
                                 </span>
                             </div>
-                            <div class="stat-value" id="avgOrderValueValue">₱586.92</div>
+                            <div class="stat-value" id="avgOrderValueValue">₱0.00</div>
                             <div class="stat-label">Avg Order Value</div>
                         </div>
                     </div>
@@ -243,19 +243,19 @@ if (!isset($_SESSION['email']) ||!isset($_SESSION['role']) ||$_SESSION['role'] !
                             </div>
                             <div class="stats-grid" style="grid-template-columns: 1fr 1fr;">
                                 <div class="stat-card" style="padding:16px;">
-                                    <div class="stat-value" style="font-size:20px;" id="grossRevenueValue">₱120,800</div>
+                                    <div class="stat-value" style="font-size:20px;" id="grossRevenueValue">₱0</div>
                                     <div class="stat-label">Gross Revenue</div>
                                 </div>
                                 <div class="stat-card" style="padding:16px;">
-                                    <div class="stat-value" style="font-size:20px; color:#dc2626;" id="totalDiscountValue">₱12,400</div>
+                                    <div class="stat-value" style="font-size:20px; color:#dc2626;" id="totalDiscountValue">₱0</div>
                                     <div class="stat-label">Total Discounts</div>
                                 </div>
                                 <div class="stat-card" style="padding:16px;">
-                                    <div class="stat-value" style="font-size:20px;" id="netRevenueValue">₱108,400</div>
+                                    <div class="stat-value" style="font-size:20px;" id="netRevenueValue">₱0</div>
                                     <div class="stat-label">Net Revenue</div>
                                 </div>
                                 <div class="stat-card" style="padding:16px;">
-                                    <div class="stat-value" style="font-size:20px; color:#10b981;" id="estProfitValue">₱46,200</div>
+                                    <div class="stat-value" style="font-size:20px; color:#10b981;" id="estProfitValue">₱0</div>
                                     <div class="stat-label">Est. Profit</div>
                                 </div>
                             </div>
@@ -278,22 +278,7 @@ if (!isset($_SESSION['email']) ||!isset($_SESSION['role']) ||$_SESSION['role'] !
                                     </thead>
                                     <tbody id="topProductsBody">
                                         <tr>
-                                            <td style="color:#9ca3af; font-weight:600;">1</td>
-                                            <td>Classic Black Frame</td>
-                                            <td>320</td>
-                                            <td style="font-weight:600;">₱48,000</td>
-                                        </tr>
-                                        <tr>
-                                            <td style="color:#9ca3af; font-weight:600;">2</td>
-                                            <td>Modern Silver Frame</td>
-                                            <td>210</td>
-                                            <td style="font-weight:600;">₱31,500</td>
-                                        </tr>
-                                        <tr>
-                                            <td style="color:#9ca3af; font-weight:600;">3</td>
-                                            <td>Premium Gold Edition</td>
-                                            <td>150</td>
-                                            <td style="font-weight:600;">₱29,000</td>
+                                            <td colspan="4" style="text-align:center; color:#9ca3af;">Loading data...</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -317,19 +302,10 @@ if (!isset($_SESSION['email']) ||!isset($_SESSION['role']) ||$_SESSION['role'] !
                                     </tr>
                                 </thead>
                                     <tbody id="discountAnalyticsBody">
-                                    <tr>
-                                        <td><strong>NEWUSER10</strong></td>
-                                        <td>84</td>
-                                        <td>₱8,400</td>
-                                        <td><span class="badge badge-success"><i class="fas fa-circle" style="font-size:7px;"></i> Active</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>SUMMER15</strong></td>
-                                        <td>42</td>
-                                        <td>₱4,000</td>
-                                        <td><span class="badge badge-danger"><i class="fas fa-circle" style="font-size:7px;"></i> Expired</span></td>
-                                    </tr>
-                                </tbody>
+                                        <tr>
+                                            <td colspan="4" style="text-align:center; color:#9ca3af;">Loading data...</td>
+                                        </tr>
+                                    </tbody>
                             </table>
                         </div>
                     </div>
@@ -441,7 +417,6 @@ if (!isset($_SESSION['email']) ||!isset($_SESSION['role']) ||$_SESSION['role'] !
             </div>
         </div>
 
-        <script src="../adminActions/notifications.js"></script>
         <script src="../adminActions/report.js"></script>
         <script src="../adminActions/global.js"></script>
     </body>

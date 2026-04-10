@@ -1,233 +1,11 @@
 // =========================================
-// CONVERSATION DATA
+// CONVERSATION DATA (DB-BACKED)
 // =========================================
 const conversationsData = {
-    inbox: [
-        {
-            id: 1,
-            name: "Erica Ramirez",
-            email: "erica@gmail.com",
-            phone: "+63 900 000 0000",
-            location: "Manila, Philippines",
-            avatar: "ER",
-            lastMessage: "Hi. I would like to ask about my order #12345.",
-            time: "10:30 AM",
-            unread: true,
-            starred: false,
-            blocked: false,
-            messages: [
-                { type: "incoming", text: "Hi. I would like to ask about my order #12345.", time: "10:30 AM" },
-                { type: "outgoing", text: "Hello! Let me check that for you right away.", time: "10:32 AM", seen: "Read 10:32 AM" },
-                { type: "incoming", text: "Thank you! I appreciate your help.", time: "10:33 AM" },
-                { type: "outgoing", text: "Your order is currently being processed and will be shipped within 24 hours.", time: "10:35 AM", seen: "Read 10:35 AM" }
-            ]
-        },
-        {
-            id: 2,
-            name: "Eds Sed",
-            email: "edriansedrik@gmail.com",
-            phone: "+63 965 726 7584",
-            location: "Quezon City, Philippines",
-            avatar: "ES",
-            lastMessage: "Is this available?",
-            time: "10:00 AM",
-            unread: false,
-            starred: false,
-            blocked: false,
-            messages: [
-                { type: "incoming", text: "Is this available?", time: "10:00 AM" },
-                { type: "outgoing", text: "Yes, it is currently available! How many do you need?", time: "10:05 AM", seen: "Read 10:05 AM" },
-                { type: "incoming", text: "I need 2 pieces. Can you ship to Quezon City?", time: "10:08 AM" },
-                { type: "outgoing", text: "Absolutely! We ship to Quezon City. Delivery takes 2-3 business days.", time: "10:10 AM", seen: "Read 10:10 AM" }
-            ]
-        },
-        {
-            id: 3,
-            name: "Pollyne Anne",
-            email: "pollyne.aldrin@yahoo.com",
-            phone: "+63 939 203 2873",
-            location: "Makati, Philippines",
-            avatar: "PA",
-            lastMessage: "Delivery query.",
-            time: "09:00 AM",
-            unread: false,
-            starred: false,
-            blocked: false,
-            messages: [
-                { type: "incoming", text: "Delivery query.", time: "09:00 AM" },
-                { type: "outgoing", text: "It would take 2-3 business days.", time: "09:15 AM", seen: "Read 09:15 AM" },
-                { type: "incoming", text: "Perfect! I'll place my order now.", time: "09:18 AM" },
-                { type: "outgoing", text: "Great! Let me know if you need any assistance.", time: "09:20 AM" }
-            ]
-        }
-    ],
-    unread: [
-        {
-            id: 4,
-            name: "Ms. Mess",
-            email: "mess.143@gmail.com",
-            phone: "+63 912 345 6789",
-            location: "Pasig, Philippines",
-            avatar: "MM",
-            lastMessage: "Invoice #332",
-            time: "11:00 AM",
-            unread: true,
-            starred: false,
-            blocked: false,
-            messages: [
-                { type: "incoming", text: "Hello, can I get a copy of invoice #332?", time: "11:00 AM" },
-                { type: "incoming", text: "I need it for my records.", time: "11:01 AM" }
-            ]
-        },
-        {
-            id: 5,
-            name: "Shipping Department",
-            email: "shipship@gmail.com",
-            phone: "+63 922 222 2222",
-            location: "Manila, Philippines",
-            avatar: "SD",
-            lastMessage: "Delivery update",
-            time: "04:00 PM",
-            unread: true,
-            starred: false,
-            blocked: false,
-            messages: [
-                { type: "incoming", text: "Delivery update for order #445", time: "04:00 PM" },
-                { type: "incoming", text: "Package is out for delivery today", time: "04:01 PM" }
-            ]
-        },
-        {
-            id: 6,
-            name: "JNT Partner",
-            email: "jnt_delivery@company.com",
-            phone: "N/A",
-            location: "Logistics Center",
-            avatar: "JNT",
-            lastMessage: "Delay notification",
-            time: "08:00 AM",
-            unread: true,
-            starred: false,
-            blocked: false,
-            messages: [
-                { type: "incoming", text: "There will be a slight delay in delivery due to weather conditions.", time: "08:00 AM" },
-                { type: "incoming", text: "Expected delivery: Tomorrow afternoon", time: "08:02 AM" }
-            ]
-        }
-    ],
-    starred: [
-        {
-            id: 7,
-            name: "Bossing",
-            email: "bigbozz@company.com",
-            phone: "+63 939 302 1628",
-            location: "BGC, Philippines",
-            avatar: "B",
-            lastMessage: "Meeting notes",
-            time: "02:30 PM",
-            unread: false,
-            starred: true,
-            blocked: false,
-            messages: [
-                { type: "incoming", text: "Meeting notes from today's session", time: "02:30 PM" },
-                { type: "incoming", text: "Please review the attached document", time: "02:32 PM" },
-                { type: "outgoing", text: "Received with thanks. I will review them.", time: "02:35 PM", seen: "Read 02:35 PM" },
-                { type: "outgoing", text: "Everything looks good. I'll implement these changes.", time: "02:45 PM", seen: "Read 02:50 PM" }
-            ]
-        },
-        {
-            id: 8,
-            name: "Big Client",
-            email: "bigclient@gmail.com",
-            phone: "+44 20 7946 0000",
-            location: "London, UK",
-            avatar: "BC",
-            lastMessage: "Proposal accepted",
-            time: "05:00 PM",
-            unread: false,
-            starred: true,
-            blocked: false,
-            messages: [
-                { type: "incoming", text: "We've reviewed your proposal and we're happy to accept!", time: "05:00 PM" },
-                { type: "outgoing", text: "That's great news! I'll send the contract shortly.", time: "05:10 PM", seen: "Read 05:12 PM" },
-                { type: "outgoing", text: "Contract sent. Please review and sign.", time: "05:43 PM", seen: "Read 06:00 PM" },
-                { type: "incoming", text: "Will review by end of day. Thanks!", time: "06:15 PM" }
-            ]
-        },
-        {
-            id: 9,
-            name: "HR Department",
-            email: "hr@company.com",
-            phone: "N/A",
-            location: "Head Office",
-            avatar: "HR",
-            lastMessage: "Holiday schedule",
-            time: "09:15 AM",
-            unread: false,
-            starred: true,
-            blocked: false,
-            messages: [
-                { type: "incoming", text: "Updated holiday schedule for 2026", time: "09:15 AM" },
-                { type: "incoming", text: "Please check the attached file", time: "09:16 AM" },
-                { type: "outgoing", text: "Noted on this. Thank you for the update!", time: "09:20 AM", seen: "Read 09:25 AM" }
-            ]
-        }
-    ],
-    archive: [
-        {
-            id: 10,
-            name: "Old Client",
-            email: "oldkliyente@yahoo.com",
-            phone: "+1 000 000 0000",
-            location: "New York, USA",
-            avatar: "OC",
-            lastMessage: "Project done",
-            time: "10:00 AM",
-            unread: false,
-            starred: false,
-            blocked: false,
-            messages: [
-                { type: "incoming", text: "Project has been completed successfully!", time: "10:00 AM" },
-                { type: "outgoing", text: "Great job team. Thanks for the update!", time: "10:30 AM", seen: "Read 11:00 AM" },
-                { type: "incoming", text: "Will send final invoice by EOD", time: "10:35 AM" },
-                { type: "outgoing", text: "Perfect, looking forward to it.", time: "10:40 AM" }
-            ]
-        },
-        {
-            id: 11,
-            name: "System",
-            email: "admin@system.com",
-            phone: "N/A",
-            location: "System",
-            avatar: "S",
-            lastMessage: "Welcome!",
-            time: "12:00 PM",
-            unread: false,
-            starred: false,
-            blocked: false,
-            messages: [
-                { type: "incoming", text: "Welcome to Look Good Frames Admin!", time: "12:00 PM" },
-                { type: "outgoing", text: "Thank you!", time: "12:05 PM" }
-            ]
-        },
-        {
-            id: 12,
-            name: "Sales Department",
-            email: "salesdept@company.com",
-            phone: "N/A",
-            location: "Sales Office",
-            avatar: "SD",
-            lastMessage: "Weekly sales update",
-            time: "08:00 AM",
-            unread: false,
-            starred: false,
-            blocked: false,
-            messages: [
-                { type: "incoming", text: "Weekly sales update for review", time: "08:00 AM" },
-                { type: "incoming", text: "Sales are up 25% this week!", time: "08:00 AM" },
-                { type: "outgoing", text: "Excellent work team! Keep it up.", time: "08:15 AM", seen: "Read 08:20 AM" }
-            ]
-        }
-    ]
+    inbox: [],
+    unread: [],
+    starred: [],
+    archive: []
 };
 
 // =========================================
@@ -236,6 +14,36 @@ const conversationsData = {
 let currentCategory = "inbox";
 let currentConversation = null;
 const commonEmojis = ["😊","😂","❤️","👍","🎉","🔥","✨","💯","🙏","👏","💪","🎯","✅","❌","⭐","💡"];
+const MESSAGES_API_URL = '../adminBack_end/messagesAPI.php';
+
+async function loadCategoryFromDB(category) {
+    try {
+        const response = await fetch(`${MESSAGES_API_URL}?filter=${encodeURIComponent(category)}&_=${Date.now()}`, { cache: 'no-store' });
+        const data = await response.json();
+        if (!response.ok || data.error) {
+            throw new Error(data.error || 'Failed to load conversations');
+        }
+
+        conversationsData[category] = Array.isArray(data) ? data : [];
+    } catch (error) {
+        console.error(`Failed to load ${category} conversations:`, error);
+        conversationsData[category] = [];
+        showNotification('Unable to load messages from database.');
+    }
+}
+
+async function postMessageAction(action, payload = {}) {
+    const response = await fetch(MESSAGES_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, ...payload })
+    });
+    const data = await response.json();
+    if (!response.ok || data.error || data.success === false) {
+        throw new Error(data.error || `Failed action: ${action}`);
+    }
+    return data;
+}
 
 // =========================================
 // UTILITY
@@ -292,41 +100,42 @@ function closeDelConvo() {
     document.getElementById('delConvo-modal').classList.remove('show');
 }
 
-function confirmDelete() {
+async function confirmDelete() {
     if (!currentConversation) return;
-    const id = currentConversation.id;
-    Object.keys(conversationsData).forEach(cat => {
-        const i = conversationsData[cat].findIndex(c => c.id === id);
-        if (i > -1) conversationsData[cat].splice(i, 1);
-    });
-    updateCategoryCounts();
-    closeDelConvo();
-    loadMessages(currentCategory);
-    document.getElementById('empty-view').style.display = "flex";
-    document.getElementById('active-view').style.display = "none";
-    currentConversation = null;
-    showNotification("Conversation deleted");
+    try {
+        await postMessageAction('delete', { user_id: currentConversation.id });
+        await loadCategoryFromDB(currentCategory);
+        updateCategoryCounts();
+        closeDelConvo();
+        loadMessages(currentCategory);
+        document.getElementById('empty-view').style.display = "flex";
+        document.getElementById('active-view').style.display = "none";
+        currentConversation = null;
+        showNotification("Conversation deleted");
+    } catch (error) {
+        console.error('Delete conversation failed:', error);
+        showNotification('Unable to delete conversation');
+    }
 }
 
 // =========================================
 // ARCHIVE
 // =========================================
-function archiveConversation() {
+async function archiveConversation() {
     if (!currentConversation) return;
-    const id = currentConversation.id;
-    Object.keys(conversationsData).forEach(cat => {
-        const i = conversationsData[cat].findIndex(c => c.id === id);
-        if (i > -1) {
-            const [convo] = conversationsData[cat].splice(i, 1);
-            if (cat !== 'archive') conversationsData.archive.push(convo);
-        }
-    });
-    updateCategoryCounts();
-    loadMessages(currentCategory);
-    document.getElementById('empty-view').style.display = "flex";
-    document.getElementById('active-view').style.display = "none";
-    currentConversation = null;
-    showNotification("Conversation archived");
+    try {
+        await postMessageAction('archive', { user_id: currentConversation.id });
+        await loadCategoryFromDB(currentCategory);
+        updateCategoryCounts();
+        loadMessages(currentCategory);
+        document.getElementById('empty-view').style.display = "flex";
+        document.getElementById('active-view').style.display = "none";
+        currentConversation = null;
+        showNotification("Conversation archived");
+    } catch (error) {
+        console.error('Archive conversation failed:', error);
+        showNotification('Unable to archive conversation');
+    }
 }
 
 // =========================================
@@ -422,14 +231,22 @@ function closeInfoSidebar() {
 // =========================================
 // MARK ALL READ
 // =========================================
-function markAllAsRead() {
-    Object.keys(conversationsData).forEach(cat => {
-        conversationsData[cat].forEach(c => { c.unread = false; });
-    });
-    conversationsData.unread = [];
-    updateCategoryCounts();
-    loadMessages(currentCategory);
-    showNotification("All messages marked as read");
+async function markAllAsRead() {
+    try {
+        const currentList = conversationsData[currentCategory] || [];
+        await Promise.all(currentList.map((c) => postMessageAction('mark_read', { user_id: c.id })));
+        await loadCategoryFromDB('inbox');
+        await loadCategoryFromDB('unread');
+        if (currentCategory !== 'inbox' && currentCategory !== 'unread') {
+            await loadCategoryFromDB(currentCategory);
+        }
+        updateCategoryCounts();
+        loadMessages(currentCategory);
+        showNotification("All messages marked as read");
+    } catch (error) {
+        console.error('Mark all read failed:', error);
+        showNotification('Unable to mark messages as read');
+    }
 }
 
 // =========================================
@@ -445,7 +262,7 @@ function handleEnter(event) {
 // =========================================
 // SEND MESSAGE
 // =========================================
-function sendNewMessage() {
+async function sendNewMessage() {
     const input = document.getElementById("type-box");
     const chatWrapper = document.getElementById("chat-box-wrapper");
     const text = input.value.trim();
@@ -461,10 +278,18 @@ function sendNewMessage() {
     input.focus();
     chatWrapper.scrollTop = chatWrapper.scrollHeight;
 
-    currentConversation.messages.push({ type: "outgoing", text, time });
-    currentConversation.lastMessage = text;
-    currentConversation.time = time;
-    loadMessages(currentCategory);
+    try {
+        await postMessageAction('send', { user_id: currentConversation.id, message: text });
+        await loadCategoryFromDB(currentCategory);
+        const refreshed = conversationsData[currentCategory].find((c) => c.id === currentConversation.id);
+        if (refreshed) {
+            openConversation(refreshed);
+        }
+        loadMessages(currentCategory);
+    } catch (error) {
+        console.error('Send message failed:', error);
+        showNotification('Failed to send message');
+    }
 }
 
 // =========================================
@@ -595,7 +420,7 @@ function loadMessages(category) {
     });
 }
 
-function setActiveCategory(category) {
+async function setActiveCategory(category) {
     if (!conversationsData[category]) return;
 
     document.querySelectorAll(".message-sidebar .menu-item").forEach((i) => {
@@ -609,12 +434,13 @@ function setActiveCategory(category) {
     }
 
     currentCategory = category;
+    await loadCategoryFromDB(currentCategory);
     loadMessages(currentCategory);
     document.getElementById('empty-view').style.display = "flex";
     document.getElementById('active-view').style.display = "none";
 }
 
-function handleNotificationDeepLink() {
+async function handleNotificationDeepLink() {
     const params = new URLSearchParams(window.location.search);
     if (params.get('source') !== 'notification') return;
 
@@ -622,7 +448,7 @@ function handleNotificationDeepLink() {
     const conversationId = parseInt(params.get('conversationId'), 10);
 
     if (preferredCategory && conversationsData[preferredCategory]) {
-        setActiveCategory(preferredCategory);
+        await setActiveCategory(preferredCategory);
     }
 
     if (Number.isNaN(conversationId)) return;
@@ -648,7 +474,7 @@ function handleNotificationDeepLink() {
 
     if (!foundConversation || !foundCategory) return;
 
-    setActiveCategory(foundCategory);
+    await setActiveCategory(foundCategory);
 
     const row = document.querySelector(`.message-msg[data-id="${foundConversation.id}"]`);
     if (row) {
@@ -678,16 +504,21 @@ function updateCategoryCounts() {
 // INIT
 // =========================================
 document.addEventListener("DOMContentLoaded", () => {
+    (async () => {
+        await loadCategoryFromDB('inbox');
+        await loadCategoryFromDB('unread');
+        await loadCategoryFromDB('starred');
+        await loadCategoryFromDB('archive');
 
-    loadMessages(currentCategory);
-    updateCategoryCounts();
+        loadMessages(currentCategory);
+        updateCategoryCounts();
 
-    // Category tabs
-    document.querySelectorAll(".message-sidebar .menu-item").forEach(item => {
-        item.addEventListener("click", () => {
-            setActiveCategory(item.dataset.category);
+        // Category tabs
+        document.querySelectorAll(".message-sidebar .menu-item").forEach(item => {
+            item.addEventListener("click", async () => {
+                await setActiveCategory(item.dataset.category);
+            });
         });
-    });
 
     // Search
     const searchInput = document.getElementById("searchMessages");
@@ -746,6 +577,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const blockBtn = document.getElementById("block-user-btn");
     if (blockBtn) blockBtn.onclick = toggleBlockUser;
 
-    initNotifications();
-    handleNotificationDeepLink();
+        initNotifications();
+        await handleNotificationDeepLink();
+    })();
 });

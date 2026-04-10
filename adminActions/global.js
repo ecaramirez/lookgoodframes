@@ -112,20 +112,7 @@ function setActiveNavLink() {
 // Global Search
 // =====================
 
-const globalSearchData = [
-    // Orders
-    { type: 'Order', label: '#1234 — Erica Ramirez', sublabel: 'Shipped · ₱245', href: '/order/order.html' },
-    { type: 'Order', label: '#1235 — Pollyne Bartolome', sublabel: 'Pending · ₱180', href: '/order/order.html' },
-    { type: 'Order', label: '#1236 — Aahron Bautista', sublabel: 'Cancelled · ₱320', href: '/order/order.html' },
-
-    // Products
-    { type: 'Product', label: 'Classic Aviator Frame', sublabel: 'Women · ₱245', href: '/product/product.html' },
-    { type: 'Product', label: 'Round Metal Frame', sublabel: 'Unisex · ₱310', href: '/product/product.html' },
-
-    // Users
-    { type: 'User', label: 'Erica Ramirez', sublabel: 'ericakes.ramirez@lookgoodframes.com', href: '/user/user.html' },
-    { type: 'User', label: 'Pollyne Bartolome', sublabel: 'pollyne@email.com', href: '/user/user.html' },
-];
+const SEARCH_API_URL = '../adminBack_end/searchAPI.php';
 
 const typeIcons = {
     Order: 'fa-shopping-cart',
@@ -142,24 +129,21 @@ function initSearchBar() {
     const searchBar = document.querySelector('.search-bar');
     if (!searchInput || !searchBar) return;
 
+    let searchDebounceTimer = null;
+    let activeSearchController = null;
+
     // Create dropdown element
     const dropdown = document.createElement('div');
     dropdown.className = 'search-dropdown';
     searchBar.appendChild(dropdown);
 
-    function renderDropdown(query) {
+    function renderDropdown(query, results) {
         dropdown.innerHTML = '';
 
         if (!query) {
             dropdown.classList.remove('show');
             return;
         }
-
-        const results = globalSearchData.filter(item =>
-            item.label.toLowerCase().includes(query) ||
-            item.sublabel.toLowerCase().includes(query) ||
-            item.type.toLowerCase().includes(query)
-        );
 
         if (results.length === 0) {
             dropdown.innerHTML = `<div class="search-no-results">No results for "${query}"</div>`;
@@ -202,8 +186,54 @@ function initSearchBar() {
         dropdown.classList.add('show');
     }
 
+    function showSearchingState(query) {
+        dropdown.innerHTML = `<div class="search-no-results">Searching for "${query}"...</div>`;
+        dropdown.classList.add('show');
+    }
+
+    async function runSearch(query) {
+        if (!query) {
+            renderDropdown('', []);
+            return;
+        }
+
+        if (activeSearchController) {
+            activeSearchController.abort();
+        }
+        activeSearchController = new AbortController();
+
+        showSearchingState(query);
+
+        try {
+            const response = await fetch(`${SEARCH_API_URL}?q=${encodeURIComponent(query)}&_=${Date.now()}`, {
+                cache: 'no-store',
+                signal: activeSearchController.signal
+            });
+            const json = await response.json();
+            const results = Array.isArray(json.results) ? json.results : [];
+            renderDropdown(query, results);
+        } catch (error) {
+            if (error.name === 'AbortError') return;
+            dropdown.innerHTML = `<div class="search-no-results">Search failed. Please try again.</div>`;
+            dropdown.classList.add('show');
+        }
+    }
+
     searchInput.addEventListener('input', (e) => {
-        renderDropdown(e.target.value.trim().toLowerCase());
+        const query = e.target.value.trim();
+
+        if (searchDebounceTimer) {
+            clearTimeout(searchDebounceTimer);
+        }
+
+        if (!query) {
+            renderDropdown('', []);
+            return;
+        }
+
+        searchDebounceTimer = setTimeout(() => {
+            runSearch(query);
+        }, 250);
     });
 
     searchInput.addEventListener('keydown', (e) => {
@@ -236,7 +266,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // NOTIFICATIONS PAGE FUNCTIONS
 
-const STORAGE_KEY = 'adminNotifications';
+const NOTIFICATIONS_API_URL = '../adminBack_end/notificationsAPI.php';
 let pageNotifications = [];
 let activeFilter = 'all';
 let currentPage = 1;
@@ -252,16 +282,11 @@ const FILTER_LABELS = {
     status: 'Status updates'
 };
 
-// Load notifications from local storage
-function pageLoadNotifications() {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) {
-        pageNotifications = [];
-        return;
-    }
+async function pageLoadNotifications() {
     try {
-        const parsed = JSON.parse(raw);
-        pageNotifications = (parsed.notifications || []).map((item) => ({
+        const response = await fetch(`${NOTIFICATIONS_API_URL}?limit=200&_=${Date.now()}`, { cache: 'no-store' });
+        const json = await response.json();
+        pageNotifications = (json.notifications || []).map((item) => ({
             ...item,
             timestamp: item.timestamp ? new Date(item.timestamp) : new Date()
         }));
@@ -270,23 +295,7 @@ function pageLoadNotifications() {
     }
 }
 
-// Save notifications to local storage
-function pageSaveNotifications() {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    let counter = 1;
-    if (raw) {
-        try {
-            const parsed = JSON.parse(raw);
-            counter = parsed.counter || counter;
-        } catch (error) {
-            counter = 1;
-        }
-    }
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        notifications: pageNotifications,
-        counter
-    }));
-}
+function pageSaveNotifications() {}
 
 // Sync notifications with header
 function syncHeaderNotifications() {
@@ -408,11 +417,21 @@ function renderNotificationPage() {
 }
 
 // Mark as read
-function markNotificationAsRead(id) {
+async function markNotificationAsRead(id) {
     const notification = pageNotifications.find((item) => item.id === id);
     if (!notification || notification.read) return;
-    notification.read = true;
-    pageSaveNotifications();
+
+    try {
+        await fetch(NOTIFICATIONS_API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'mark_read', id })
+        });
+        notification.read = true;
+    } catch (error) {
+        console.error('Failed to mark notification as read:', error);
+    }
+
     syncHeaderNotifications();
     updateUnreadSummary();
     renderNotificationPage();
@@ -431,19 +450,19 @@ function getNotificationTargetUrl(notification) {
         extractProductIdFromText(notification.message);
     switch (notification.type) {
         case 'order':
-            return `/order/order.html?source=notification&action=open-order&orderId=${encodeURIComponent(orderId || '')}&focus=summary`;
+            return `orders.php?source=notification&orderId=${encodeURIComponent(orderId || '')}`;
         case 'payment':
-            return `/order/order.html?source=notification&action=open-payment&orderId=${encodeURIComponent(orderId || '')}&tab=payments`;
+            return `orders.php?source=notification&tab=payments&orderId=${encodeURIComponent(orderId || '')}`;
         case 'cancel':
-            return `/order/order.html?source=notification&action=open-order&orderId=${encodeURIComponent(orderId || '')}&focus=summary`;
+            return `orders.php?source=notification&orderId=${encodeURIComponent(orderId || '')}`;
         case 'status':
-            return `/order/order.html?source=notification&action=open-order&orderId=${encodeURIComponent(orderId || '')}&focus=timeline`;
+            return `orders.php?source=notification&tab=status&orderId=${encodeURIComponent(orderId || '')}`;
         case 'return':
-            return `/order/order.html?source=notification&action=open-order&orderId=${encodeURIComponent(orderId || '')}&focus=return&details=${encodeURIComponent(notification.message || '')}`;
+            return `orders.php?source=notification&tab=returns&orderId=${encodeURIComponent(orderId || '')}`;
         case 'stock':
-            return `/product/product.html?source=notification&tab=inventory&productId=${encodeURIComponent(productId || '')}`;
+            return `product.php?source=notification&tab=inventory&productId=${encodeURIComponent(productId || '')}`;
         default:
-            return '/dashboard/dashboard.html';
+            return 'dashboard.php';
     }
 }
 
@@ -473,11 +492,11 @@ function normalizeOrderId(orderId) {
 }
 
 // Open notification target
-function openNotificationTarget(id) {
+async function openNotificationTarget(id) {
     const notification = pageNotifications.find((item) => item.id === id);
     if (!notification) return;
     if (!notification.read) {
-        markNotificationAsRead(id);
+        await markNotificationAsRead(id);
     }
     const targetUrl = getNotificationTargetUrl(notification);
     if (targetUrl) {
@@ -486,11 +505,20 @@ function openNotificationTarget(id) {
 }
 
 // Mark all as read
-function markAllAsRead() {
+async function markAllAsRead() {
+    try {
+        await fetch(NOTIFICATIONS_API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'mark_all_read' })
+        });
+    } catch (error) {
+        console.error('Failed to mark all notifications as read:', error);
+    }
+
     pageNotifications.forEach((item) => {
         item.read = true;
     });
-    pageSaveNotifications();
     syncHeaderNotifications();
     updateUnreadSummary();
     renderNotificationPage();
@@ -527,8 +555,8 @@ function bindNotificationEvents() {
 }
 
 // Initialize notifications page
-function initNotificationsPage() {
-    pageLoadNotifications();
+async function initNotificationsPage() {
+    await pageLoadNotifications();
     bindNotificationEvents();
     initProfileFeatures();
     updateUnreadSummary();
@@ -540,10 +568,8 @@ function initNotificationsPage() {
 // ============================================================
 
 let notifications = [];
-let notificationIdCounter = 1;
 let showAllNotifications = false;
 let notificationsInitialized = false;
-const SAMPLE_NOTIFICATIONS_VERSION = '2026-04-09';
 
 function initNotifications() {
     if (notificationsInitialized) return;
@@ -596,12 +622,13 @@ function initNotifications() {
     if (markAllReadBtn) {
         markAllReadBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            notifications.forEach(notification => {
-                notification.read = true;
-            });
-            saveNotificationsToStorage();
-            updateNotificationBadge();
-            renderNotifications();
+            fetch(NOTIFICATIONS_API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'mark_all_read' })
+            })
+            .then(() => loadNotifications())
+            .catch((error) => console.error('Failed to mark all notifications as read:', error));
         });
     }
 
@@ -631,30 +658,29 @@ function viewAllNotificationsHandler(event) {
         event.stopPropagation();
     }
 
-    window.location.href = '/notification/notification.html';
+    const currentPath = window.location.pathname || '';
+    const adminMarker = '/admin/';
+    const markerIndex = currentPath.toLowerCase().indexOf(adminMarker);
+
+    if (markerIndex !== -1) {
+        const adminBasePath = currentPath.slice(0, markerIndex + adminMarker.length);
+        window.location.href = `${adminBasePath}notifications.php`;
+        return;
+    }
+
+    window.location.href = 'admin/notifications.php';
 }
 
 window.viewAllNotificationsHandler = viewAllNotificationsHandler;
 
 function addNotification(type, title, message, data = {}) {
-    const notification = {
-        id: notificationIdCounter++,
-        type: type,
-        title: title,
-        message: message,
-        timestamp: new Date(),
-        read: false,
-        data: data
-    };
-
-    notifications.unshift(notification);
-    saveNotificationsToStorage();
-    updateNotificationBadge();
-    renderNotifications();
-
-    if (typeof showToast === 'function') {
-        showToast(`New notification: ${title}`, 'info');
-    }
+    fetch(NOTIFICATIONS_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'create', type, title, message, data })
+    })
+    .then(() => loadNotifications())
+    .catch((error) => console.error('Failed to create notification:', error));
 }
 
 function updateNotificationBadge() {
@@ -725,9 +751,16 @@ function markAsRead(notificationId) {
     const notification = notifications.find(n => n.id === notificationId);
     if (notification) {
         notification.read = true;
-        saveNotificationsToStorage();
-        updateNotificationBadge();
-        renderNotifications();
+        fetch(NOTIFICATIONS_API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'mark_read', id: notificationId })
+        })
+        .then(() => {
+            updateNotificationBadge();
+            renderNotifications();
+        })
+        .catch((error) => console.error('Failed to mark notification as read:', error));
     }
 
     return notification || null;
@@ -768,176 +801,23 @@ function getTimeAgo(date) {
 }
 
 function loadNotifications() {
-    const stored = localStorage.getItem('adminNotifications');
-    if (stored) {
-        try {
-            const parsed = JSON.parse(stored);
-            notifications = parsed.notifications || [];
-            notificationIdCounter = parsed.counter || 1;
-
-            notifications.forEach(notification => {
-                if (typeof notification.timestamp === 'string') {
-                    notification.timestamp = new Date(notification.timestamp);
-                }
-            });
-        } catch (e) {
-            console.warn('Failed to load notifications from storage');
-            loadSampleNotifications();
-        }
-    } else {
-        loadSampleNotifications();
-    }
-
-    syncSampleNotificationsVersion();
-    ensureMinimumSampleNotifications(12);
-    updateNotificationBadge();
-    renderNotifications();
-    showAllNotifications = false;
-}
-
-function syncSampleNotificationsVersion() {
-    const versionKey = 'adminNotificationsSampleVersion';
-    const savedVersion = localStorage.getItem(versionKey);
-    if (savedVersion === SAMPLE_NOTIFICATIONS_VERSION) return;
-
-    notifications = [];
-    notificationIdCounter = 1;
-    loadSampleNotifications();
-    saveNotificationsToStorage();
-    localStorage.setItem(versionKey, SAMPLE_NOTIFICATIONS_VERSION);
-}
-
-function ensureMinimumSampleNotifications(minCount) {
-    if (notifications.length >= minCount) return;
-
-    const templates = getSampleNotificationTemplates();
-    const needed = Math.min(minCount - notifications.length, templates.length);
-
-    for (let i = 0; i < needed; i++) {
-        const template = templates[i];
-        notifications.push({
-            id: notificationIdCounter++,
-            type: template.type,
-            title: template.title,
-            message: template.message,
-            data: template.data || {},
-            timestamp: template.timestamp,
-            read: false
+    fetch(`${NOTIFICATIONS_API_URL}?limit=100&_=${Date.now()}`, { cache: 'no-store' })
+        .then((res) => res.json())
+        .then((json) => {
+            notifications = (json.notifications || []).map((item) => ({
+                ...item,
+                timestamp: item.timestamp ? new Date(item.timestamp) : new Date()
+            }));
+            updateNotificationBadge();
+            renderNotifications();
+            showAllNotifications = false;
+        })
+        .catch((error) => {
+            console.error('Failed to load notifications:', error);
+            notifications = [];
+            updateNotificationBadge();
+            renderNotifications();
         });
-    }
-
-    saveNotificationsToStorage();
-}
-
-function saveNotificationsToStorage() {
-    try {
-        const data = {
-            notifications: notifications,
-            counter: notificationIdCounter
-        };
-        localStorage.setItem('adminNotifications', JSON.stringify(data));
-    } catch (e) {
-        console.warn('Failed to save notifications to storage');
-    }
-}
-
-function loadSampleNotifications() {
-    const sampleNotifications = getSampleNotificationTemplates();
-
-    sampleNotifications.forEach(notification => {
-        notification.id = notificationIdCounter++;
-        notification.read = false;
-        notifications.push(notification);
-    });
-}
-
-function getSampleNotificationTemplates() {
-    return [
-        {
-            type: 'order',
-            title: 'New Order Placed',
-            message: 'Order #ORD-004 has been placed by Seventeen',
-            data: { orderId: 'ORD-004' },
-            timestamp: new Date(Date.now() - 5 * 60 * 1000)
-        },
-        {
-            type: 'payment',
-            title: 'Payment Received',
-            message: 'Payment of ₱224.99 received for Order #ORD-002',
-            data: { orderId: 'ORD-002' },
-            timestamp: new Date(Date.now() - 15 * 60 * 1000)
-        },
-        {
-            type: 'stock',
-            title: 'Low Stock Alert',
-            message: 'iDeal Aura stock is below threshold (10 units remaining)',
-            data: { productId: '1' },
-            timestamp: new Date(Date.now() - 30 * 60 * 1000)
-        },
-        {
-            type: 'status',
-            title: 'Discount Campaign Active',
-            message: 'SUMMER2026 is active with 55 redemptions remaining (45/100 used).',
-            data: { url: '/product/product.html?source=notification&tab=discounts&discountCode=SUMMER2026' },
-            timestamp: new Date(Date.now() - 45 * 60 * 1000)
-        },
-        {
-            type: 'status',
-            title: 'Discount Limit Reached',
-            message: 'FLASH50 has reached its usage limit (50/50) and is no longer redeemable.',
-            data: { url: '/product/product.html?source=notification&tab=discounts&discountCode=FLASH50' },
-            timestamp: new Date(Date.now() - 60 * 60 * 1000)
-        },
-        {
-            type: 'status',
-            title: 'Order Status Updated',
-            message: 'Order #ORD-003 for Aahron Bautista is now marked as Shipped.',
-            data: { orderId: 'ORD-003' },
-            timestamp: new Date(Date.now() - 90 * 60 * 1000)
-        },
-        {
-            type: 'return',
-            title: 'Return Request',
-            message: 'Kim Mingyu submitted a return request for Order #ORD-005',
-            data: { orderId: 'ORD-005' },
-            timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000)
-        },
-        {
-            type: 'status',
-            title: 'New Customer Message',
-            message: 'Erica Ramirez sent a new message: "Hi. I would like to ask about my order #12345."',
-            data: { url: '/message/message.html?source=notification&category=inbox&conversationId=1' },
-            timestamp: new Date(Date.now() - 3 * 60 * 60 * 1000)
-        },
-        {
-            type: 'status',
-            title: 'Unread Message Alert',
-            message: 'Ms. Mess requested a copy of invoice #332 in unread conversations.',
-            data: { url: '/message/message.html?source=notification&category=unread&conversationId=4' },
-            timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000)
-        },
-        {
-            type: 'status',
-            title: 'New Feedback Posted',
-            message: 'Ericakes Ramirez rated Classic Round Frames 5 stars.',
-            data: { url: '/feedback/feedback.html?source=notification&feedbackId=1' },
-            timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000)
-        },
-        {
-            type: 'status',
-            title: 'Critical Feedback',
-            message: 'Michael Wong rated Vintage Cat Eye 1 star and requested assistance.',
-            data: { url: '/feedback/feedback.html?source=notification&feedbackId=10' },
-            timestamp: new Date(Date.now() - 6 * 60 * 60 * 1000)
-        },
-        {
-            type: 'status',
-            title: 'Product Updated',
-            message: 'iDeal Atlas was updated with Spring Sale pricing in Product catalog.',
-            data: { url: '/product/product.html?source=notification&tab=products' },
-            timestamp: new Date(Date.now() - 7 * 60 * 60 * 1000)
-        }
-    ];
 }
 
 document.addEventListener('DOMContentLoaded', initNotifications);

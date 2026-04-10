@@ -1,5 +1,5 @@
 <?php
-require_once '../config.php';
+require_once __DIR__ . '/../config.php';
 session_start();
 
 if (!isset($_SESSION['email']) || !isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
@@ -31,16 +31,31 @@ if ($method === 'POST') {
 
 // GET - list all feedback
 $feedbacks = [];
-$res = $conn->query("
-    SELECT f.id, u.name AS customer, p.name AS product,
-           f.rating, f.comment, f.admin_reply AS reply, f.created_at AS date
-    FROM feedback f
-    JOIN users u ON f.user_id = u.id
-    JOIN products p ON f.product_id = p.id
-    ORDER BY f.created_at DESC
-");
+$res = $conn->query(
+    "SELECT
+        f.id,
+        TRIM(CONCAT(COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, ''))) AS customer,
+        p.name AS product,
+        f.rating,
+        f.comment,
+        COALESCE(f.admin_reply, '') AS reply,
+        f.created_at AS date
+     FROM feedback f
+     LEFT JOIN users u ON f.user_id = u.user_id
+     LEFT JOIN products p ON f.product_id = p.product_id
+     ORDER BY f.created_at DESC"
+);
+
+if (!$res) {
+    http_response_code(500);
+    echo json_encode(['error' => 'Failed to load feedback']);
+    exit();
+}
+
 while ($row = $res->fetch_assoc()) {
     $row['id']     = (int)$row['id'];
+    $row['customer'] = trim((string)($row['customer'] ?? '')) !== '' ? trim((string)$row['customer']) : 'Customer';
+    $row['product'] = (string)($row['product'] ?? 'Product');
     $row['rating'] = (int)$row['rating'];
     $row['reply']  = $row['reply'] ?? '';
     $row['date']   = date('Y-m-d', strtotime($row['date']));

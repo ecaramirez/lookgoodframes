@@ -173,10 +173,10 @@ if(isset($_SESSION['email'])){
                             </div>
 
                             <div class="stat-info">
-                                <div class="stat-value">143</div>
+                                <div class="stat-value" id="dashboardTotalProducts">0</div>
                                 <div class="stat-label">Total Products</div>
-                                <div class="stat-change">
-                                     <i class="fas fa-arrow-up"></i> 17%
+                                <div class="stat-change" id="dashboardTrendProducts">
+                                     <i class="fas fa-minus"></i> 0%
                                 </div>
                             </div>
                         </div>
@@ -189,10 +189,10 @@ if(isset($_SESSION['email'])){
                             </div>
 
                             <div class="stat-info">
-                                <div class="stat-value">143</div>
+                                <div class="stat-value" id="dashboardTotalOrders">0</div>
                                 <div class="stat-label">Total Orders</div>
-                                <div class="stat-change">
-                                     <i class="fas fa-arrow-up"></i> 17%
+                                <div class="stat-change" id="dashboardTrendOrders">
+                                     <i class="fas fa-minus"></i> 0%
                                 </div>
                             </div>
                         </div>
@@ -205,10 +205,10 @@ if(isset($_SESSION['email'])){
                             </div>
 
                             <div class="stat-info">
-                                <div class="stat-value">143</div>
+                                <div class="stat-value" id="dashboardTotalUsers">0</div>
                                 <div class="stat-label">Total Users</div>
-                                <div class="stat-change">
-                                     <i class="fas fa-arrow-up"></i> 17%
+                                <div class="stat-change" id="dashboardTrendUsers">
+                                     <i class="fas fa-minus"></i> 0%
                                 </div>
                             </div>
                         </div>
@@ -221,10 +221,10 @@ if(isset($_SESSION['email'])){
                             </div>
 
                             <div class="stat-info">
-                                <div class="stat-value">143</div>
+                                <div class="stat-value" id="dashboardTotalRevenue">P0.00</div>
                                 <div class="stat-label">Total revenue</div>
-                                <div class="stat-change">
-                                     <i class="fas fa-arrow-up"></i> 17%
+                                <div class="stat-change" id="dashboardTrendRevenue">
+                                     <i class="fas fa-minus"></i> 0%
                                 </div>
                             </div>
                         </div>
@@ -403,7 +403,6 @@ if(isset($_SESSION['email'])){
 
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script src="../adminActions/global.js"></script>
-        <script src="../adminActions/notifications.js"></script>
         <script src="../adminActions/dashboard.js"></script>
     </body>
 </html>

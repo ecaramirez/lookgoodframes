@@ -1,96 +1,5 @@
-// Feedback data
-const feedbacks = [
-    { 
-        id: 1, 
-        customer: "Ericakes Ramirez", 
-        product: "Classic Round Frames", 
-        rating: 5, 
-        comment: "Excellent quality! The frames are exactly as described and the fit is perfect. Very satisfied with my purchase.", 
-        date: "2026-04-02", 
-        reply: "" 
-    },
-    { 
-        id: 2, 
-        customer: "Eds Sedrik", 
-        product: "Modern Square Frames", 
-        rating: 3, 
-        comment: "Average quality. The product is okay but could be better for the price.", 
-        date: "2026-04-01", 
-        reply: "" 
-    },
-    { 
-        id: 3, 
-        customer: "Pollyne Anne", 
-        product: "Aviator Sunglasses", 
-        rating: 4, 
-        comment: "Good product overall. Stylish design and comfortable to wear.", 
-        date: "2026-03-31", 
-        reply: "" 
-    },
-    { 
-        id: 4, 
-        customer: "Aarhon Bautista", 
-        product: "Vintage Cat Eye", 
-        rating: 5, 
-        comment: "Very good! Love the retro style and the quality is top-notch.", 
-        date: "2026-03-30", 
-        reply: "" 
-    },
-    { 
-        id: 5, 
-        customer: "Maria Santos", 
-        product: "Designer Metal Frames", 
-        rating: 2, 
-        comment: "Not satisfied with the durability. The frame feels a bit flimsy.", 
-        date: "2026-03-29", 
-        reply: "" 
-    },
-    { 
-        id: 6, 
-        customer: "John Dela Cruz", 
-        product: "Sport Wrap Frames", 
-        rating: 4, 
-        comment: "Works well for sports activities. Comfortable and stays in place.", 
-        date: "2026-03-28", 
-        reply: "" 
-    },
-    { 
-        id: 7, 
-        customer: "Anna Mae", 
-        product: "Classic Round Frames", 
-        rating: 5, 
-        comment: "Perfect! Exactly what I was looking for. Fast delivery too!", 
-        date: "2026-03-27", 
-        reply: "" 
-    },
-    { 
-        id: 8, 
-        customer: "Robert Chen", 
-        product: "Modern Square Frames", 
-        rating: 3, 
-        comment: "Decent frames but the color was slightly different from the photos.", 
-        date: "2026-03-26", 
-        reply: "" 
-    },
-    {
-        id: 9,
-        customer: "Sarah Johnson",
-        product: "Aviator Sunglasses",
-        rating: 5,
-        comment: "Amazing! These aviators are perfect for sunny days. Great UV protection.",
-        date: "2026-03-25",
-        reply: ""
-    },
-    {
-        id: 10,
-        customer: "Michael Wong",
-        product: "Vintage Cat Eye",
-        rating: 1,
-        comment: "Very disappointed. The frame broke after just one week of normal use.",
-        date: "2026-03-24",
-        reply: ""
-    }
-];
+const FEEDBACK_API_URL = '../adminBack_end/feedbackAPI.php';
+let feedbacks = [];
 
 // Reply templates
 const replyTemplates = {
@@ -105,7 +14,7 @@ const replyTemplates = {
 let currentPage = 1;
 const itemsPerPage = 6;
 let selectedFeedbackId = null;
-let filteredFeedbacks = [...feedbacks];
+let filteredFeedbacks = [];
 
 // DOM elements
 const feedbackGrid = document.getElementById("feedbackGrid");
@@ -387,7 +296,7 @@ function useTemplate() {
 }
 
 // Send reply
-sendReplyBtn.onclick = function() {
+sendReplyBtn.onclick = async function() {
     if (!selectedFeedbackId) return;
 
     const reply = adminReplyInput.value.trim();
@@ -399,7 +308,23 @@ sendReplyBtn.onclick = function() {
     const feedback = feedbacks.find(f => f.id === selectedFeedbackId);
     if (!feedback) return;
 
-    // save reply
+    try {
+        const res = await fetch(FEEDBACK_API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: selectedFeedbackId, reply })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+            throw new Error(data.error || 'Failed to save reply');
+        }
+    } catch (error) {
+        console.error('Failed to save reply:', error);
+        showNotification('Failed to save reply to database.', 'error');
+        return;
+    }
+
+    // Update local cache after successful DB write.
     feedback.reply = reply;
 
     // update reply display
@@ -479,8 +404,27 @@ function handleNotificationDeepLink() {
     openFeedbackModal(feedbackId);
 }
 
+async function loadFeedbacksFromDB() {
+    try {
+        const res = await fetch(`${FEEDBACK_API_URL}?_=${Date.now()}`, { cache: 'no-store' });
+        const data = await res.json();
+        if (!res.ok || data.error) {
+            throw new Error(data.error || 'Failed to load feedback');
+        }
+
+        feedbacks = Array.isArray(data) ? data : [];
+        filteredFeedbacks = [...feedbacks];
+    } catch (error) {
+        console.error('Failed to load feedback:', error);
+        feedbacks = [];
+        filteredFeedbacks = [];
+        alert('Unable to load feedback data from the database right now.');
+    }
+}
+
 // Initialize
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+    await loadFeedbacksFromDB();
     renderFeedbackGrid();
     updateStats();
     initNotifications();

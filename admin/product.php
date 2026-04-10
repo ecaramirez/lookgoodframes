@@ -1077,7 +1077,6 @@ if (!isset($_SESSION['email']) ||!isset($_SESSION['role']) ||$_SESSION['role'] !
         </div>
 
         <script src="../adminActions/global.js"></script>
-        <script src="../adminActions/notifications.js"></script>
         <script src="../adminActions/products.js"></script>
     </body>
 </html>

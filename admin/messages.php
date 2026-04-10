@@ -170,28 +170,28 @@ if (!isset($_SESSION['email']) ||!isset($_SESSION['role']) ||$_SESSION['role'] !
                                 <i class="fas fa-inbox"></i>
                                 <span class="text">Inbox</span>
                             </div>
-                            <span class="count">3</span>
+                            <span class="count">0</span>
                         </div>
                         <div class="menu-item" data-category="unread">
                             <div class="menu-icon-text">
                                 <i class="fas fa-envelope"></i>
                                 <span class="text">Unread</span>
                             </div>
-                            <span class="count">3</span>
+                            <span class="count">0</span>
                         </div>
                         <div class="menu-item" data-category="starred">
                             <div class="menu-icon-text">
                                 <i class="fas fa-star"></i>
                                 <span class="text">Starred</span>
                             </div>
-                            <span class="count">3</span>
+                            <span class="count">0</span>
                         </div>
                         <div class="menu-item" data-category="archive">
                             <div class="menu-icon-text">
                                 <i class="fas fa-box-archive"></i>
                                 <span class="text">Archive</span>
                             </div>
-                            <span class="count">3</span>
+                            <span class="count">0</span>
                         </div>
                     </div>
 
@@ -432,7 +432,6 @@ if (!isset($_SESSION['email']) ||!isset($_SESSION['role']) ||$_SESSION['role'] !
             </div>
         </div>
 
-    <script src="../adminActions/notifications.js"></script>
     <script src="../adminActions/messages.js"></script>
     <script src="../adminActions/global.js"></script>
 </body>

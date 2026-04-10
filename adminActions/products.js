@@ -15,7 +15,7 @@ let deleteDiscountId    = null;
 let viewModalImageList  = [];
 let currentViewImageIndex = 0;
 const PRODUCT_ID_PATTERN = /^LGF-\d{3}$/;
-// Mock data
+// In-memory state synchronized with DB APIs
 const mockData = {
     products: [],
     discounts: []
@@ -1000,6 +1000,11 @@ function updateInventory() {
                 product.stock = stock;
                 product.price = price;
             }
+
+            if (typeof window.loadNotifications === 'function') {
+                window.loadNotifications();
+            }
+
             closeModal('updateInventoryModal');
             renderProducts();
             renderInventory();

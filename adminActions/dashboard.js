@@ -1,141 +1,165 @@
-//to render bar chart and calculate the height based sa order count
-document.addEventListener('DOMContentLoaded', function() {
-    
-    const ctx = document.getElementById('salesChart').getContext('2d');
-    const salesData = [4.2, 3.8, 5.1, 6.5, 5.8, 7.2, 6.9, 8.1, 7.5, 8.8, 9.2, 8.5];
-    const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-    gradient.addColorStop(0, 'rgba(59, 130, 246, 0.3)');
-    gradient.addColorStop(1, 'rgba(59, 130, 246, 0.01)');
+let dashboardChart = null;
 
-    // Chart configuration
-    const config = {
+function formatCurrency(value) {
+    const amount = Number(value || 0);
+    return `P${amount.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
+function formatCurrencyCompact(value) {
+    const amount = Number(value || 0);
+    if (amount >= 1000000) return `P${(amount / 1000000).toFixed(1).replace(/\.0$/, '')}M`;
+    if (amount >= 1000) return `P${(amount / 1000).toFixed(1).replace(/\.0$/, '')}K`;
+    return `P${amount.toFixed(0)}`;
+}
+
+function computeYAxisMax(maxValue) {
+    const value = Number(maxValue || 0);
+    if (value <= 0) return 1000;
+
+    const padded = value * 1.2;
+    const magnitude = Math.pow(10, Math.floor(Math.log10(padded)));
+    const scaled = Math.ceil(padded / magnitude) * magnitude;
+    return Math.max(1000, scaled);
+}
+
+function updateSummaryCards(data) {
+    const totalProductsEl = document.getElementById('dashboardTotalProducts');
+    const totalOrdersEl = document.getElementById('dashboardTotalOrders');
+    const totalUsersEl = document.getElementById('dashboardTotalUsers');
+    const totalRevenueEl = document.getElementById('dashboardTotalRevenue');
+
+    if (totalProductsEl) totalProductsEl.textContent = Number(data.total_products || 0).toLocaleString();
+    if (totalOrdersEl) totalOrdersEl.textContent = Number(data.total_orders || 0).toLocaleString();
+    if (totalUsersEl) totalUsersEl.textContent = Number(data.total_customers || 0).toLocaleString();
+    if (totalRevenueEl) totalRevenueEl.textContent = formatCurrency(data.total_revenue || 0);
+
+    const trends = data.trends || {};
+    updateTrendElement('dashboardTrendProducts', Number(trends.products || 0));
+    updateTrendElement('dashboardTrendOrders', Number(trends.orders || 0));
+    updateTrendElement('dashboardTrendUsers', Number(trends.users || 0));
+    updateTrendElement('dashboardTrendRevenue', Number(trends.revenue || 0));
+}
+
+function updateTrendElement(elementId, value) {
+    const el = document.getElementById(elementId);
+    if (!el) return;
+
+    const numeric = Number.isFinite(value) ? value : 0;
+    const absValue = Math.abs(numeric).toFixed(1).replace(/\.0$/, '');
+
+    let iconClass = 'fa-minus';
+    let color = '#6b7280';
+    if (numeric > 0) {
+        iconClass = 'fa-arrow-up';
+        color = '#16a34a';
+    } else if (numeric < 0) {
+        iconClass = 'fa-arrow-down';
+        color = '#dc2626';
+    }
+
+    el.style.color = color;
+    el.innerHTML = `<i class="fas ${iconClass}"></i> ${absValue}%`;
+}
+
+function renderSalesChart(monthlySales) {
+    const canvas = document.getElementById('salesChart');
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const values = Array.isArray(monthlySales) ? monthlySales.map((v) => Number(v || 0)) : new Array(12).fill(0);
+
+    const maxValue = Math.max(...values, 0);
+    const yMax = computeYAxisMax(maxValue);
+
+    const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+    gradient.addColorStop(0, 'rgba(59, 130, 246, 0.28)');
+    gradient.addColorStop(1, 'rgba(59, 130, 246, 0.02)');
+
+    if (dashboardChart) {
+        dashboardChart.destroy();
+    }
+
+    dashboardChart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: labels,
+            labels,
             datasets: [{
-            label: 'Sales',
-            data: salesData,
-            borderColor: '#3B82F6',
-            backgroundColor: gradient,
-            borderWidth: 3,
-            pointRadius: 5,              
-            pointBackgroundColor: '#FFFFFF', 
-            pointBorderColor: '#3B82F6',
-            pointBorderWidth: 3,
-            pointHoverRadius: 8,
-            pointHoverBackgroundColor: '#3B82F6',
-            pointHoverBorderColor: '#FFFFFF',
-            pointHoverBorderWidth: 3,
-            fill: true,
-            tension: 0.4
-        }]
+                label: 'Sales',
+                data: values,
+                borderColor: '#3B82F6',
+                backgroundColor: gradient,
+                borderWidth: 3,
+                pointRadius: 4,
+                pointBackgroundColor: '#FFFFFF',
+                pointBorderColor: '#3B82F6',
+                pointBorderWidth: 2,
+                pointHoverRadius: 6,
+                fill: true,
+                tension: 0.35
+            }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                // Hide the legend
-                legend: {
-                    display: false
-                },
-                
+                legend: { display: false },
                 tooltip: {
                     enabled: true,
-                    backgroundColor: '#1F2937', 
+                    backgroundColor: '#1F2937',
                     titleColor: '#FFFFFF',
                     bodyColor: '#FFFFFF',
-                    padding: 12,
-                    cornerRadius: 8,
                     displayColors: false,
                     callbacks: {
-                        label: function(context) {
-                            const month = context.label;          
-                            const value = context.parsed.y;       
-                            return `${month} ₱${value.toFixed(1)}k`; 
-                        },
-                        title: function() {
-                            return ''; 
-                        }
-                    },
-                    bodyFont: {
-                        size: 14,
-                        weight: 'bold'
+                        label: (context) => `${context.label} ${formatCurrency(context.parsed.y)}`,
+                        title: () => ''
                     }
                 }
             },
             scales: {
-                // X-axis
                 x: {
-                    grid: {
-                        display: true,
-                        color: '#F3F4F6', 
-                        lineWidth: 1
-                    },
-                    border: {
-                        display: false
-                    },
-                    ticks: {
-                        color: '#9CA3AF', 
-                        font: {
-                            size: 12
-                        }
-                    }
+                    grid: { color: '#F3F4F6' },
+                    border: { display: false },
+                    ticks: { color: '#9CA3AF' }
                 },
-                // Y-axis 
                 y: {
                     min: 0,
-                    max: 10,
+                    max: yMax,
                     ticks: {
-                        stepSize: 2,
-                        color: '#9CA3AF', 
-                        font: {
-                            size: 12
-                        },
-                       
-                        callback: function(value) {
-                            return value + 'k';
-                        }
+                        color: '#9CA3AF',
+                        callback: (value) => formatCurrencyCompact(value)
                     },
-                    grid: {
-                        display: true,
-                        color: '#F3F4F6', 
-                        lineWidth: 1
-                    },
-                    border: {
-                        display: false
-                    }
+                    grid: { color: '#F3F4F6' },
+                    border: { display: false }
                 }
-            },
-            
+            }
         }
-    };
+    });
+}
 
-   
-    const salesChart = new Chart(ctx, config);
-
-});
-
-
-const categorySalesData = [
-    { category: 'Women', sales: 5000, percentage: 50, color: '#ff6384' },
-    { category: 'Men', sales: 3000, percentage: 30, color: '#36a2eb' },
-    { category: 'Unisex', sales: 2000, percentage: 20, color: '#ffce56' },
-];
-
-function salesByCategory() {
+function renderCategorySales(categorySales) {
     const chartContainer = document.getElementById('categorySalesChart');
     const legendContainer = document.getElementById('categorySalesLegend');
-    if (!chartContainer || !legendContainer) {
+    if (!chartContainer || !legendContainer) return;
+
+    const colors = ['#ff6384', '#36a2eb', '#ffce56', '#8b5cf6', '#10b981'];
+    const rows = (Array.isArray(categorySales) ? categorySales : []).map((row, index) => ({
+        category: row.category || 'Unknown',
+        sales: Number(row.sales || 0),
+        percentage: Number(row.percentage || 0),
+        color: colors[index % colors.length]
+    }));
+
+    const totalSales = rows.reduce((sum, item) => sum + item.sales, 0);
+
+    if (rows.length === 0 || totalSales <= 0) {
+        chartContainer.innerHTML = '<div class="empty-state">No category sales data.</div>';
+        legendContainer.innerHTML = '';
         return;
     }
 
-    //calculate total sales
-    const totalSales = categorySalesData.reduce((sum, item) => sum + item.sales, 0);
-
-    let currentAngle = 0; //for donut chart
-    const gradientStops = categorySalesData.map(item => {
-        //to calculate percentage to degrees
+    let currentAngle = 0;
+    const gradientStops = rows.map((item) => {
         const angle = (item.percentage / 100) * 360;
         const startAngle = currentAngle;
         const endAngle = currentAngle + angle;
@@ -146,91 +170,110 @@ function salesByCategory() {
     chartContainer.innerHTML = `
         <div class="donut-chart" style="background: conic-gradient(${gradientStops});">
             <div class="donut-center" style="width: 120px; height: 120px; background: white; border-radius: 50%;">
-                <div class="donut-total">₱${(totalSales / 1000).toFixed(0)}k</div>
+                <div class="donut-total">${formatCurrency(totalSales)}</div>
                 <div class="donut-label">Total Sales</div>
             </div>
         </div>
     `;
 
-    legendContainer.innerHTML = categorySalesData.map(item => `
+    legendContainer.innerHTML = rows.map((item) => `
         <div class="legend-row">
             <div class="legend-info">
                 <span class="legend-dot" style="background: ${item.color};"></span>
                 <span class="legend-name">${item.category}</span>
             </div>
             <div class="legend-stats">
-                <span class="legend-value">₱${(item.sales / 1000).toFixed(1)}k</span>
+                <span class="legend-value">${formatCurrency(item.sales)}</span>
                 <span class="legend-percentage">${item.percentage}%</span>
             </div>
         </div>
     `).join('');
 }
 
-//Recent Activities
-const recentActivities = [
-    { type: 'order', icon: 'fa-shopping-cart', title: 'New order received', description: 'Order #1234 from Erica Ramirez', time: '2 minutes ago' },
-    { type: 'user', icon: 'fa-user-plus', title: 'New order registered', description: 'Pollyne Anne joined the platform', time: '15 minutes ago' },
-    { type: 'product', icon: 'fa-box', title: 'Product updated', description: 'Classic Aviator Frame - Stock updated', time: '1 hour ago' },
-    { type: 'product', icon: 'fa-box', title: 'Product updated', description: 'Classic Aviator Frame - Stock updated', time: '1 hour ago' },
-    { type: 'payment', icon: 'fa-credit-card', title: 'Payment received', description: '₱245.00 from Order #1246', time: '2 hours ago' },
-    { type: 'order', icon: 'fa-shopping-cart', title: 'Order shipped', description: 'Order #1245 has been dispatched', time: '3 hours ago' },
-    { type: 'user', icon: 'fa-user-plus', title: 'New user registered', description: 'Edrian Sedrik joined the platform', time: '5 hours ago' }
-];
+function formatRelativeTime(value) {
+    if (!value) return 'Just now';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return 'Just now';
 
-function recentActivity() {
+    const diffSeconds = Math.floor((Date.now() - date.getTime()) / 1000);
+    if (diffSeconds < 60) return 'Just now';
+    if (diffSeconds < 3600) return `${Math.floor(diffSeconds / 60)}m ago`;
+    if (diffSeconds < 86400) return `${Math.floor(diffSeconds / 3600)}h ago`;
+    return `${Math.floor(diffSeconds / 86400)}d ago`;
+}
+
+function renderRecentActivity(activities) {
     const activityList = document.getElementById('activityList');
     if (!activityList) return;
 
-    activityList.innerHTML = recentActivities.map(activity => `
+    const rows = Array.isArray(activities) ? activities : [];
+    if (rows.length === 0) {
+        activityList.innerHTML = '<div class="empty-state">No recent activity.</div>';
+        return;
+    }
+
+    activityList.innerHTML = rows.map((activity) => `
         <div class="activity-item">
-            <div class="activity-icon ${activity.type}">
-                <i class="fas ${activity.icon}"></i>
+            <div class="activity-icon ${activity.type || 'status'}">
+                <i class="fas ${activity.icon || 'fa-bell'}"></i>
             </div>
             <div class="activity-content">
-                <div class="activity-title">${activity.title}</div>
-                <div class="activity-description">${activity.description}</div>
+                <div class="activity-title">${activity.title || 'Activity'}</div>
+                <div class="activity-description">${activity.description || ''}</div>
             </div>
-            <div class="activity-time">${activity.time}</div>
+            <div class="activity-time">${formatRelativeTime(activity.time)}</div>
         </div>
     `).join('');
 }
 
-//Recent Orders
-const mockdata = {
-    orders: [
-        { id: "#1234", customerName: "Erica Ramirez", product: "Classic Aviator Frame", status: "Shipped", total: 245 },
-        { id: "#1234", customerName: "Pollyne Anne Bartolome", product: "Classic Aviator Frame", status: "Shipped", total: 245 },
-        { id: "#1234", customerName: "Aahron Bautista", product: "Classic Aviator Frame", status: "Shipped", total: 245 },
-        { id: "#1234", customerName: "Edrian Sedrik Halili", product: "Classic Aviator Frame", status: "Shipped", total: 245 },
-    ]
-};
-
 function getStatusBadgeClass(status) {
-    switch (status.toLowerCase()) {
-        case 'shipped': return 'badge-success';
-        case 'pending': return 'badge-warning';
-        case 'cancelled': return 'badge-danger';
-        default: return 'badge-secondary';
-    }
+    const value = String(status || '').toLowerCase();
+    if (value === 'completed' || value === 'shipped' || value === 'delivered') return 'badge-success';
+    if (value === 'pending') return 'badge-warning';
+    if (value === 'cancelled' || value === 'failed') return 'badge-danger';
+    return 'badge-secondary';
 }
 
-function recentOrders() {
+function renderRecentOrders(orders) {
     const tableBody = document.querySelector('#recentOrdersTable tbody');
     if (!tableBody) return;
 
-    tableBody.innerHTML = mockdata.orders.slice(0, 5).map(order => `
+    const rows = Array.isArray(orders) ? orders : [];
+    if (rows.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:16px;">No recent orders found.</td></tr>';
+        return;
+    }
+
+    tableBody.innerHTML = rows.map((order) => `
         <tr>
-            <td><strong>${order.id}</strong></td>
-            <td>${order.customerName}</td>
-            <td>${order.product}</td>
-            <td><span class="badge ${getStatusBadgeClass(order.status)}">${order.status}</span></td>
-            <td><strong>₱${order.total}</strong></td>
+            <td><strong>${order.id || '-'}</strong></td>
+            <td>${order.customerName || 'Customer'}</td>
+            <td>${order.product || '-'}</td>
+            <td><span class="badge ${getStatusBadgeClass(order.status)}">${order.status || 'Completed'}</span></td>
+            <td><strong>${formatCurrency(order.total || 0)}</strong></td>
         </tr>
     `).join('');
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    salesByCategory();
-    recentActivity();
-    recentOrders();
-});
+function renderDashboard(data) {
+    updateSummaryCards(data || {});
+    renderSalesChart(data.monthly_sales || []);
+    renderCategorySales(data.category_sales || []);
+    renderRecentActivity(data.recent_activities || []);
+    renderRecentOrders(data.recent_orders || []);
+}
+
+function loadDashboardData() {
+    fetch(`../adminBack_end/dashboardAPI.php?_=${Date.now()}`, { cache: 'no-store' })
+        .then((res) => res.json())
+        .then((data) => {
+            if (data && !data.error) {
+                renderDashboard(data);
+            }
+        })
+        .catch((error) => {
+            console.error('Failed to load dashboard data:', error);
+        });
+}
+
+document.addEventListener('DOMContentLoaded', loadDashboardData);

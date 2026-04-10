@@ -649,7 +649,6 @@ if (!isset($_SESSION['email']) ||!isset($_SESSION['role']) ||$_SESSION['role'] !
             <span id="toastMessage"></span>
         </div>
 
-        <script src="../adminActions/notifications.js"></script>
         <script src="../adminActions/orders.js"></script>
         <script src="../adminActions/global.js"></script>
     </body>

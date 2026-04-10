@@ -1,0 +1,160 @@
+/* ===== Global Fix ===== */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: linear-gradient(135deg, #f5f5f5, #e9e9e9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px; /* prevents edge overflow on small screens */
+}
+
+/* ===== Container ===== */
+.forgot-container {
+    width: 100%;
+    max-width: 420px;
+}
+
+/* ===== Card ===== */
+.forgot-card {
+    background: white;
+    padding: 40px;
+    border-radius: 14px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+    text-align: center;
+}
+
+/* ===== Logo ===== */
+.logo-img {
+    width: 120px;
+    margin-bottom: 20px;
+}
+
+/* ===== Title ===== */
+.forgot-title {
+    margin: 10px 0 5px;
+    font-size: 22px;
+}
+
+.forgot-subtitle {
+    color: #777;
+    font-size: 14px;
+    margin-bottom: 30px;
+}
+
+/* ===== Form ===== */
+.form-group {
+    text-align: left;
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+.form-group label {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    display: block;
+}
+
+/* ===== Input Wrapper ===== */
+.input-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+/* ===== Input Field ===== */
+.input-wrapper input {
+    width: 100%;
+    padding: 12px 12px 12px 40px; /* left space for icon */
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    font-size: 14px;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+/* Focus effect */
+.input-wrapper input:focus {
+    border-color: black;
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.05);
+}
+
+/* ===== Input Icon ===== */
+.input-icon {
+    position: absolute;
+    top: 50%;
+    left: 12px;
+    transform: translateY(-50%);
+    color: #888;
+    font-size: 14px;
+    pointer-events: none;
+}
+
+/* ===== Button ===== */
+.reset-button {
+    width: 100%;
+    padding: 12px;
+    background: black;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.reset-button:hover {
+    background: #333;
+}
+
+/* ===== Messages ===== */
+.error-message,
+.success-message {
+    display: none;
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.error-message {
+    background: #ffe5e5;
+    color: #cc0000;
+}
+
+.success-message {
+    background: #e5ffe8;
+    color: #008f3d;
+}
+
+/* ===== Back Link ===== */
+.back-to-login {
+    margin-top: 20px;
+    font-size: 14px;
+}
+
+.back-to-login a {
+    color: black;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.back-to-login a:hover {
+    text-decoration: underline;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 480px) {
+    .forgot-card {
+        padding: 25px;
+    }
+}

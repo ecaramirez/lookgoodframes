@@ -1,0 +1,229 @@
+.notification-container {
+    position: relative;
+    margin-right: -5px;
+    
+}
+
+.notification-trigger {
+    position: relative;
+    padding: 12px;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: color 0.2s ease;
+    font-size: 20px;
+    border-radius: 8px;
+}
+
+.notification-trigger:hover {
+    color: var(--text-color);
+    background: var(--bg-color);
+}
+
+.notification-badge {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background: var(--danger);
+    color: white;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.notification-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 380px;
+    max-height: 500px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    z-index: 1100;
+    display: none;
+    overflow: hidden;
+}
+
+.notification-dropdown.expanded {
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.notification-dropdown.expanded-view {
+    width: min(560px, 92vw);
+    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.18);
+    border-color: rgba(37, 99, 235, 0.25);
+}
+
+.notification-dropdown.expanded .notification-footer {
+    background: rgba(37, 99, 235, 0.06);
+}
+
+.notification-dropdown.expanded-view .notification-header {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.notification-dropdown.expanded .view-all-notifications {
+    font-weight: 700;
+}
+
+.notification-dropdown.show {
+    display: block;
+}
+
+.notification-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-color);
+}
+
+.notification-header h4 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.mark-all-read {
+    background: none;
+    border: none;
+    color: var(--info);
+    font-size: 13px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background 0.2s ease;
+}
+
+.mark-all-read:hover {
+    background: rgba(37, 99, 235, 0.1);
+}
+
+.notification-list {
+    max-height: 350px;
+    overflow-y: auto;
+}
+
+.notification-list.expanded {
+    max-height: none;
+    overflow-y: visible;
+}
+
+.notification-item {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.notification-item:hover {
+    background: var(--bg-color);
+}
+
+.notification-item.unread {
+    background: rgba(37, 99, 235, 0.05);
+    border-left: 3px solid var(--info);
+}
+
+.notification-item-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.notification-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.notification-icon.order {
+    background: rgba(37, 99, 235, 0.1);
+    color: var(--info);
+}
+
+.notification-icon.payment {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--success);
+}
+
+.notification-icon.stock {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--warning);
+}
+
+.notification-icon.cancel {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--danger);
+}
+
+.notification-icon.status {
+    background: rgba(139, 92, 246, 0.1);
+    color: #8b5cf6;
+}
+
+.notification-icon.return {
+    background: rgba(236, 72, 153, 0.1);
+    color: #ec4899;
+}
+
+.notification-text {
+    flex: 1;
+}
+
+.notification-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 2px;
+}
+
+.notification-message {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+
+.notification-time {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+.notification-footer {
+    padding: 12px 20px;
+    border-top: 1px solid var(--border-color);
+    background: var(--bg-color);
+    text-align: center;
+}
+
+.view-all-notifications {
+    background: none;
+    border: none;
+    color: var(--info);
+    font-size: 14px;
+    cursor: pointer;
+    padding: 8px 16px;
+    border-radius: 6px;
+    transition: background 0.2s ease;
+}
+
+.view-all-notifications:hover {
+    background: rgba(37, 99, 235, 0.1);
+}

@@ -1,0 +1,55 @@
+body { 
+    font-family: Arial, sans-serif; 
+    padding: 20px; 
+}
+
+.products { 
+    display: flex; 
+    flex-wrap: wrap; 
+    gap: 20px; 
+}
+
+.product-card { 
+    border: 1px solid #ccc; 
+    padding: 10px; 
+    width: 220px; 
+    border-radius: 8px; 
+    box-shadow: 1px 1px 5px rgba(0,0,0,0.1);
+}
+
+.product-card img { 
+    width: 100%; 
+    height: auto;
+}
+
+.product-card h3 { 
+    margin: 5px 0; 
+    font-size: 18px;
+}
+
+.product-card p { 
+    margin: 3px 0; 
+    font-size: 14px; 
+}
+
+.product-card form { 
+    margin-top: 5px; 
+}
+
+.product-card input[type=number] {
+    width: 60px; 
+    padding: 3px; 
+}
+
+.product-card button { 
+    padding: 5px 10px; 
+    cursor: pointer; 
+}
+
+.back-link { 
+    display: inline-block; 
+    margin-top: 20px; 
+    text-decoration: none; 
+    color: #333; 
+    font-weight: bold; 
+}
